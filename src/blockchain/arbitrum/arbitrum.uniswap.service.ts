@@ -1,9 +1,10 @@
 /* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
-import QuoterAbi from '../blockchain/abi/uniswap-quoter.json';
-import FactoryAbi from '../blockchain/abi/uniswap-factory.json';
-import PoolAbi from '../blockchain/abi/uniswap-pool.json';
+import QuoterAbi from '../abi/uniswap-quoter.json';
+import FactoryAbi from '../abi/uniswap-factory.json';
+import PoolAbi from '../abi/uniswap-pool.json';
+import ERC20Abi from '../abi/erc20.json';
 
 @Injectable()
 export class ArbitrumUniswapService {
@@ -20,7 +21,19 @@ export class ArbitrumUniswapService {
 
   async getPairRate(tokenIn: string, tokenOut: string, amountIn: number): Promise<number> {
     try {
-      const amountInWei = ethers.parseUnits(amountIn.toString(), 6); // Ajusta el decimal según tu token
+      let tokenInDecimals = null;
+      let tokenOutDecimals = null;
+      try{
+        tokenInDecimals = await this.getTokenDecimals(tokenIn);
+        tokenOutDecimals = await this.getTokenDecimals(tokenOut);
+      }catch(error){
+        console.error('Error fetching decimals:', error);
+        throw error;
+      }
+      if(tokenInDecimals === null){
+        throw new Error(`No decimal found for ${tokenIn}`);
+      }
+      const amountInWei = ethers.parseUnits(amountIn.toString(), tokenInDecimals); // Ajusta el decimal según tu token
       let poolFee;
       
       try{
@@ -42,7 +55,7 @@ export class ArbitrumUniswapService {
       const result = await this.quoter.quoteExactInputSingle.staticCall(params)
       
       const amountOut = result[0]; // El primer valor retornado es amountOut
-      return parseFloat(ethers.formatUnits(amountOut, 6)); // Ajusta el decimal según tu token
+      return parseFloat(ethers.formatUnits(amountOut, tokenOutDecimals)); // Ajusta el decimal según tu token
     } catch (error) {
       console.error('Error fetching pair rate:', error);
       throw error;
@@ -59,5 +72,10 @@ export class ArbitrumUniswapService {
       }
     }
     throw new Error(`No pool found for the pair ${tokenIn} and ${tokenOut}`);
+  }
+  async getTokenDecimals(tokenAddress: string): Promise<number> {
+    const tokenContract = new ethers.Contract(tokenAddress, ERC20Abi, this.provider);
+    const decimals = await tokenContract.decimals();
+    return Number(decimals);
   }
 }

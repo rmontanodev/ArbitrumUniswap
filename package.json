@@ -20,6 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@apollo/client": "^3.11.1",
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
     "@nestjs/common": "^10.0.0",
@@ -27,7 +28,9 @@
     "@nestjs/platform-express": "^10.0.0",
     "@uniswap/sdk-core": "^5.3.1",
     "@uniswap/v3-sdk": "^3.13.1",
+    "axios": "^1.7.2",
     "ethers": "^6.13.2",
+    "graphql": "^16.9.0",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
     "web3": "^4.11.1"

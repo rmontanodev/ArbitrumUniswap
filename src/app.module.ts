@@ -3,7 +3,8 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ArbitrumUniswapModule } from './blockchain/arbitrum.module';
+import { ArbitrumUniswapModule } from './blockchain/arbitrum/arbitrum.module';
+
 
 @Module({
   imports: [ArbitrumUniswapModule],
